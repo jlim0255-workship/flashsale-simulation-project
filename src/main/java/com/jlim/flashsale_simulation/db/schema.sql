@@ -26,3 +26,7 @@ INSERT INTO events (id, name, capacity) VALUES (1, 'Milestone One', 100);
 INSERT INTO inventory (event_id, available) VALUES (1, 100);
 
 SELECT setval('events_id_seq', 1);
+
+--- M3 idempotency
+ALTER TABLE orders ALTER COLUMN idempotency_key SET NOT NULL;
+ALTER TABLE orders ADD CONSTRAINT uq_orders_idem UNIQUE (idempotency_key);
