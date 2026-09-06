@@ -21,11 +21,15 @@ public class PurchaseController {
     @PostMapping("/purchase")
     PurchaseResponse createPurchase (
             @RequestHeader(name = "X-User-Id") String userId,
+            @RequestHeader(name = "Idempotency-Key") String idempotencyKey,
             @RequestBody PurchaseRequest req){
 
-        PurchaseResult result = purchaseService.purchase(req.getEventId(), userId);
+        // TODO: delegate, map to response
 
-        // convert purchase result to purchase response
+        // Delegate to the service layer with the generated key
+        PurchaseResult result = purchaseService.purchase(req.getEventId(), userId, idempotencyKey);
+
+        // Convert purchase result to purchase response
         return Mapper.fromPurchaseResultToPurchaseResponse(result);
     }
 
@@ -34,6 +38,7 @@ public class PurchaseController {
         // read from db using a single join query
         String sql = """
                 SELECT
+                    e.id AS id,
                     e.capacity AS capacity,
                     i.available AS available,
                     (SELECT COUNT(*) FROM orders o WHERE o.event_id = e.id) AS sold
